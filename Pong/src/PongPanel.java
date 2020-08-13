@@ -29,27 +29,42 @@ public class PongPanel extends JPanel implements ActionListener, KeyListener
 		Timer timer = new Timer(TIMER_DELAY, this);
 			timer.start();
 		
+			addKeyListener(this);
+			setFocusable(true);
 	}
 	
 	@Override
 	public void keyTyped(KeyEvent event)
 	{
-		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void keyPressed(KeyEvent event)
 	{
-		// TODO Auto-generated method stub
-		
+		// Player 1 Controls
+		if(event.getKeyCode() == KeyEvent.VK_W)
+			paddle1.setYVelocity(-1);
+		else if(event.getKeyCode() == KeyEvent.VK_S)
+			paddle1.setYVelocity(1);
+
+		// Player 2 Controls
+		if(event.getKeyCode() == KeyEvent.VK_UP)
+			paddle2.setYVelocity(-1);
+		else if(event.getKeyCode() == KeyEvent.VK_DOWN)
+			paddle2.setYVelocity(1);
 	}
 
 	@Override
 	public void keyReleased(KeyEvent event)
 	{
-		// TODO Auto-generated method stub
-		
+		// Player 1 Controls
+		if(event.getKeyCode() == KeyEvent.VK_W|| event.getKeyCode() == KeyEvent.VK_S)
+			paddle1.setYVelocity(0);
+
+		// Player 2 Controls
+		if(event.getKeyCode() == KeyEvent.VK_UP || event.getKeyCode() == KeyEvent.VK_DOWN)
+			paddle2.setYVelocity(0);
 	}
 
 	private void update()
@@ -65,11 +80,14 @@ public class PongPanel extends JPanel implements ActionListener, KeyListener
 				break;
 			}
 			case Playing :
-				{
-					moveObject(ball);
-					checkWallBounce();
-					break;
-				}
+			{
+				moveObject(paddle1);
+				moveObject(paddle2);
+				moveObject(ball);
+				checkWallBounce();
+				checkPaddleBounce();
+				break;
+			}
 			case GameOver :
 			{
 				break;
@@ -80,15 +98,32 @@ public class PongPanel extends JPanel implements ActionListener, KeyListener
 	private void moveObject(Sprite object)
 	{
 		object.setXPosition(object.getXPosition() + object.getXVelocity());
-		object.setYPosition(object.getYPosition() + object.getYVelocity());
+		object.setYPosition(object.getYPosition() + object.getYVelocity(), getHeight());
 	}
 	
 	private void checkWallBounce()
 	{
 		if(ball.getXPosition() <= 0 || ball.getXPosition() >= getWidth() - ball.getWidth())
+		{
 			ball.setXVelocity(-ball.getXVelocity());
+			resetBall();
+		}
+		
 		if(ball.getYPosition() <= 0 || ball.getYPosition() >= getHeight() - ball.getHeight())
 			ball.setYVelocity(-ball.getYVelocity());
+	}
+	
+	private void resetBall()
+	{
+		ball.resetToInitialPosition();
+	}
+	
+	private void checkPaddleBounce()
+	{
+		if(ball.getXVelocity() < 0 && ball.getRectangle().intersects(paddle1.getRectangle()))
+			ball.setXVelocity(BALL_MOVEMENT_SPEED);
+		if(ball.getXVelocity() > 0 && ball.getRectangle().intersects(paddle2.getRectangle()))
+			ball.setXVelocity(-BALL_MOVEMENT_SPEED);
 	}
 	
 	@Override
